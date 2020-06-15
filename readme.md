@@ -6,6 +6,7 @@ Banking application to practice architectural patterns.
 
 ```
 sbt compile
+sbt test:compile
 sbt test
 ```
 
