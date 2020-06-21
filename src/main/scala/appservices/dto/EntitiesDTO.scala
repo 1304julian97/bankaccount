@@ -1,5 +1,6 @@
 package appservices.dto
 
-class EntitiesDTO {
+import java.time.LocalDateTime
 
-}
+case class BankAccountDTO( accountNumber: Int, startDate: LocalDateTime, state: String, balance: Int )
+

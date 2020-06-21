@@ -1,5 +1,3 @@
-package appservices
 
-class RestResponse {
 
-}
+case class RestResponse[T]( objectResponse: T, businessException: String )
