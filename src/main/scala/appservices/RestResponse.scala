@@ -1,0 +1,5 @@
+package appservices
+
+class RestResponse {
+
+}
