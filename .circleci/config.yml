@@ -1,0 +1,8 @@
+version: 2.0
+jobs:
+  build:
+    docker:
+      - image: bigtruedata/sbt
+    steps:
+      - checkout
+      - run: echo "Hello World"
