@@ -1,0 +1,15 @@
+version: 2.0
+jobs:
+  build:
+    docker:
+      - image: bigtruedata/sbt
+    steps:
+      - checkout
+      - run: sbt compile
+
+  test:
+    docker:
+      - image: bigtruedata/sbt
+    steps:
+      - checkout
+      - run: sbt test
