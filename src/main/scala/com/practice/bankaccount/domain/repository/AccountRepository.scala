@@ -1,6 +1,6 @@
 package com.practice.bankaccount.domain.repository
 
-import com.practice.bankaccount.domain.model.{ BankAccount }
+import com.practice.bankaccount.domain.model.BankAccount
 
 trait AccountRepository {
 

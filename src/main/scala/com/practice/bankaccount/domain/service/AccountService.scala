@@ -33,7 +33,7 @@ object AccountService {
 
   }
 
-  def listAllAcounts()(repository: AccountRepository):Either[String,List[BankAccount]]={
+  def listAllAcounts()( repository: AccountRepository ): Either[String, List[BankAccount]] = {
     repository.list()
   }
 
