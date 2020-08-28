@@ -1,4 +1,4 @@
-package com.practice.bankaccount.domain.model
+package com.practice.bankaccount.domain.service
 
 object AccountType extends Enumeration {
 
