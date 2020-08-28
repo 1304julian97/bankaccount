@@ -2,6 +2,7 @@ package com.practice.bankaccount.domain.service
 
 import com.practice.bankaccount.domain.model.{ AccountStatus, BankAccount, CheckingAccount, SavingsAccount }
 import com.practice.bankaccount.domain.repository.AccountRepository
+import com.practice.bankaccount.infrastructure.persistence.dao.BankAccountMapper
 
 object AccountService {
 
@@ -26,15 +27,21 @@ object AccountService {
             case "C" => BankAccount.createCheckingAccount( number, balance )
           }
         }
-        resultUpsert <- repository.upsert( createdAccount )
-      } yield resultUpsert
+        resultUpsert <- repository.upsert( createdAccount match {
+          case ch: CheckingAccount => BankAccountMapper.convertCheckingAccountEntityToDAO( ch )
+          case sa: SavingsAccount  => BankAccountMapper.convertSavingAccountEntityToDAO( sa )
+        } )
+      } yield createdAccount
 
     }
 
   }
 
   def listAllAcounts()( repository: AccountRepository ): Either[String, List[BankAccount]] = {
-    repository.list()
+    repository.list() match {
+      case Right( list ) => Right( list.map( b => BankAccountMapper.convertBankAccountDAOToCheckingAccoutEntity( b ) ) )
+      case Left( s )     => Left( s )
+    }
   }
 
 }
