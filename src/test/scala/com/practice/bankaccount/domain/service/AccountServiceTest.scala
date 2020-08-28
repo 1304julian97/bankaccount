@@ -1,9 +1,8 @@
 package com.practice.bankaccount.domain.service
 
-import java.time.LocalDateTime
 
 import com.practice.bankaccount.domain.model.{ AccountStatus, BankAccount }
-import com.practice.bankaccount.infrastructure.persistence.repository.AccountRepositoryInMemory
+import com.practice.bankaccount.infrastructure.persistence.repositoryinstances.AccountRepositoryInMemory
 import org.scalatest.flatspec.AnyFlatSpec
 
 class AccountServiceTest extends AnyFlatSpec {
