@@ -1,5 +1,9 @@
 package com.practice.bankaccount.application.adapters.http
 
-trait SetRoutes {
+import akka.http.scaladsl.server.Route
+
+trait SetRoutes extends Routes {
+
+  def getRoutes: Route = route
 
 }
