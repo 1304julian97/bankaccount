@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 
 case class BankAccountDTO(
   accountNumber: Int,
-  startDate:     LocalDateTime,
+  startDate:     String,
   status:        String,
   balance:       Int
 )

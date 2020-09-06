@@ -7,21 +7,13 @@ import akka.http.scaladsl.server.Route
 import com.practice.bankaccount.application.PersitenceContext
 import com.practice.bankaccount.application.commandqueries.{ CommanUpsertAccounts, QueryGetAccounts }
 import com.practice.bankaccount.application.dto.{ BankAccountDTO, RestResponse }
-import io.circe._
-import io.circe.generic.semiauto._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 
-trait JsonDecoders {
-
-  implicit val foundAccountDecoder: Decoder[BankAccountDTO] = deriveDecoder[BankAccountDTO]
-  implicit val foundAccountEncoder: Encoder[BankAccountDTO] = deriveEncoder[BankAccountDTO]
-}
-
-trait Routes {
+trait Routes extends JsonDecoders {
 
   def context: PersitenceContext
 
-  val route =
+  val route: Route =
     path( "bank-accounts" ) {
       get {
         val response: RestResponse[List[BankAccountDTO]] = QueryGetAccounts.execute( context )
@@ -34,5 +26,6 @@ trait Routes {
           }
         }
     }
+
 }
 
