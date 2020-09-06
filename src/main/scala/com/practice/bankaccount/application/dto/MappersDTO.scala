@@ -8,7 +8,7 @@ import com.practice.bankaccount.domain.model.{ AccountStatus, BankAccount, Check
 
 object MappersDTO {
 
-  private val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern( "yyyy-MM-dd HH:mm" )
+  private val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern( "yyyy-MM-dd HH:mm:ss" )
 
   def convertBankAccountDTOToSavingAccoutEntity( dto: BankAccountDTO ): SavingsAccount = {
     val status = convertAccountStatusStringToEnum( dto.status )
