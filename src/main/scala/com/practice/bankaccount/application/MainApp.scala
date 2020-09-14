@@ -33,6 +33,7 @@ object MainApp extends App with JsonDecoders with Routes {
   sys.addShutdownHook {
     println( "PostStop" )
   }
+
   println( "Already finished" )
 
 }
