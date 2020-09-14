@@ -2,11 +2,11 @@ package com.practice.bankaccount.infrastructure.persistence
 
 import com.practice.bankaccount.domain.model.BankAccount
 import com.practice.bankaccount.domain.repository.AccountRepository
-import com.practice.bankaccount.infrastructure.persistence.dao.{BankAccountDAORecord, BankAccountMapper}
+import com.practice.bankaccount.infrastructure.persistence.dao.{BankAccountDAORecord, BankAccountDAOMapper}
 
 import scala.collection.mutable
 
-class AccountRepositoryInMemory extends AccountRepository with BankAccountMapper {
+class AccountRepositoryInMemory extends AccountRepository with BankAccountDAOMapper {
 
   private var records: mutable.Map[Int, BankAccountDAORecord] = scala.collection.mutable.Map[Int, BankAccountDAORecord]()
 

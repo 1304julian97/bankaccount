@@ -2,7 +2,7 @@ package com.practice.bankaccount.application.service
 
 import com.practice.bankaccount.domain.model.{ BankAccount, SavingsAccount }
 import com.practice.bankaccount.domain.repository.AccountRepository
-import com.practice.bankaccount.infrastructure.persistence.dao.{ BankAccountDAORecord, BankAccountMapper }
+import com.practice.bankaccount.infrastructure.persistence.dao.{ BankAccountDAORecord, BankAccountDAOMapper }
 
 class AccountService {
 

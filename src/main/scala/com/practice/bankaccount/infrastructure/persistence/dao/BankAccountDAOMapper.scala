@@ -2,7 +2,7 @@ package com.practice.bankaccount.infrastructure.persistence.dao
 
 import com.practice.bankaccount.domain.model.{BankAccount, CheckingAccount, SavingsAccount, Status}
 
-trait BankAccountMapper {
+trait BankAccountDAOMapper {
 
   private def validateStatus( recordStatus: String ): Either[String, Status] = {
     Status.fromString( recordStatus ) match {
