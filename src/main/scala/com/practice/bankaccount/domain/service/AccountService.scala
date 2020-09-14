@@ -16,9 +16,9 @@ object AccountService {
     val defaultRate: Double = 0.0
 
     for {
-      accType <- checkAccountType( accountType )
+      validType <- checkAccountType( accountType )
       newAccount <- {
-        if ( accType == "S" ) BankAccount.createSavingsAccount( number, balance, defaultRate )
+        if ( validType == "S" ) BankAccount.createSavingsAccount( number, balance, defaultRate )
         else BankAccount.createCheckingAccount( number, balance )
       }
       savedAccount <- repository.upsert( newAccount )
