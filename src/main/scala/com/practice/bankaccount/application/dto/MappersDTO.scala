@@ -3,8 +3,8 @@ package com.practice.bankaccount.application.dto
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-import com.practice.bankaccount.domain.model.AccountStatus.AccountStatus
-import com.practice.bankaccount.domain.model.{ AccountStatus, BankAccount, CheckingAccount, SavingsAccount }
+import com.practice.bankaccount.domain.model.Status.AccountStatus
+import com.practice.bankaccount.domain.model.{ Status, BankAccount, CheckingAccount, SavingsAccount }
 
 object MappersDTO {
 
@@ -30,17 +30,17 @@ object MappersDTO {
 
   def convertAccountStatusEnumToString( status: AccountStatus ): String = {
     status match {
-      case AccountStatus.BLOCKED => "BLOCKED"
-      case AccountStatus.FROZEN  => "FROZEN"
-      case AccountStatus.ACTIVE  => "ACTIVE"
+      case Status.BLOCKED => "BLOCKED"
+      case Status.FROZEN  => "FROZEN"
+      case Status.ACTIVE  => "ACTIVE"
     }
   }
 
   def convertAccountStatusStringToEnum( status: String ): AccountStatus = {
     status match {
-      case "BLOCKED" => AccountStatus.BLOCKED
-      case "FROZEN"  => AccountStatus.FROZEN
-      case "ACTIVE"  => AccountStatus.ACTIVE
+      case "BLOCKED" => Status.BLOCKED
+      case "FROZEN"  => Status.FROZEN
+      case "ACTIVE"  => Status.ACTIVE
     }
   }
 

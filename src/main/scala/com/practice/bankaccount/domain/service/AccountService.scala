@@ -1,6 +1,6 @@
 package com.practice.bankaccount.domain.service
 
-import com.practice.bankaccount.domain.model.{ AccountStatus, BankAccount, CheckingAccount, SavingsAccount }
+import com.practice.bankaccount.domain.model.{ Status, BankAccount, CheckingAccount, SavingsAccount }
 import com.practice.bankaccount.domain.repository.AccountRepository
 import com.practice.bankaccount.infrastructure.persistence.dao.BankAccountMapper
 

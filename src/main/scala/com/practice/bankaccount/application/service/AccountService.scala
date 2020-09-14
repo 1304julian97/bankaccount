@@ -2,7 +2,7 @@ package com.practice.bankaccount.application.service
 
 import com.practice.bankaccount.domain.model.{ BankAccount, SavingsAccount }
 import com.practice.bankaccount.domain.repository.AccountRepository
-import com.practice.bankaccount.infrastructure.persistence.dao.{ BankAccountDAO, BankAccountMapper }
+import com.practice.bankaccount.infrastructure.persistence.dao.{ BankAccountDAORecord, BankAccountMapper }
 
 class AccountService {
 
@@ -22,7 +22,7 @@ class AccountService {
   }
 
   def getListAccount( repository: AccountRepository ): Either[Throwable, List[BankAccount]] = {
-    val acountsTry: Either[String, List[BankAccountDAO]] = repository.list()
+    val acountsTry: Either[String, List[BankAccountDAORecord]] = repository.list()
 
     acountsTry match {
       case Right( accounts ) => Right( accounts.map( ba => BankAccountMapper.convertBankAccountDAOToCheckingAccoutEntity( ba ) ) )
