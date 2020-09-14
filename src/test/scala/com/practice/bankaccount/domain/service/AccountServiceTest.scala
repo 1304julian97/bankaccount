@@ -1,7 +1,6 @@
 package com.practice.bankaccount.domain.service
 
-
-import com.practice.bankaccount.domain.model.{BankAccount, Status}
+import com.practice.bankaccount.domain.model.{ ACTIVE, BankAccount, Status }
 import com.practice.bankaccount.infrastructure.persistence.AccountRepositoryInMemory
 import org.scalatest.flatspec.AnyFlatSpec
 
@@ -15,7 +14,7 @@ class AccountServiceTest extends AnyFlatSpec {
     assert( result.isRight )
     assert( result.right.get.number == 8001 )
     assert( result.right.get.balance == 50000 )
-    assert( result.right.get.status == Status.ACTIVE )
+    assert( result.right.get.status == ACTIVE )
 
   }
 

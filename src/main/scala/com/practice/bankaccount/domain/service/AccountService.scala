@@ -6,7 +6,7 @@ import com.practice.bankaccount.infrastructure.persistence.dao.BankAccountDAOMap
 
 object AccountService {
 
-  private def checkAccountType(accountType: String): Either[String, String] = {
+  private def checkAccountType( accountType: String ): Either[String, String] = {
     if ( accountType != "S" && accountType != "C" ) Left( s"Account type '$accountType' to open is not valid" )
     else Right( accountType )
   }
