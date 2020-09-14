@@ -1,39 +1,32 @@
 package com.practice.bankaccount.domain.service
 
-import com.practice.bankaccount.domain.model.{ AccountStatus, BankAccount, CheckingAccount, SavingsAccount }
+import com.practice.bankaccount.domain.model.{ Status, BankAccount, CheckingAccount, SavingsAccount }
 import com.practice.bankaccount.domain.repository.AccountRepository
+import com.practice.bankaccount.infrastructure.persistence.dao.BankAccountDAOMapper
 
 object AccountService {
 
+  private def checkAccountType( accountType: String ): Either[String, String] = {
+    if ( accountType != "S" && accountType != "C" ) Left( s"Account type '$accountType' to open is not valid" )
+    else Right( accountType )
+  }
+
   def openAccount( number: Int, balance: Int, accountType: String )( repository: AccountRepository ): Either[String, BankAccount] = {
-    if ( accountType != "S" && accountType != "C" ) {
-      Left( "Invalid account type" )
-    } else {
-      /*val result: Either[String, BankAccount] = accountType match {
-        case "S" => BankAccount.createSavingsAccount( number, balance )
-        case "C" => BankAccount.createCheckingAccount( number, balance )
+
+    val defaultRate: Double = 0.0
+
+    for {
+      validType <- checkAccountType( accountType )
+      newAccount <- {
+        if ( validType == "S" ) BankAccount.createSavingsAccount( number, balance, defaultRate )
+        else BankAccount.createCheckingAccount( number, balance )
       }
-
-      result match {
-        case Left( error )    => Left( error )
-        case Right( account ) => repository.upsert( account )
-      }*/
-
-      for {
-        createdAccount <- {
-          accountType match {
-            case "S" => BankAccount.createSavingsAccount( number, balance )
-            case "C" => BankAccount.createCheckingAccount( number, balance )
-          }
-        }
-        resultUpsert <- repository.upsert( createdAccount )
-      } yield resultUpsert
-
-    }
+      savedAccount <- repository.upsert( newAccount )
+    } yield savedAccount
 
   }
 
-  def listAllAcounts()(repository: AccountRepository):Either[String,List[BankAccount]]={
+  def listAcounts()( repository: AccountRepository ): Either[String, List[BankAccount]] = {
     repository.list()
   }
 
