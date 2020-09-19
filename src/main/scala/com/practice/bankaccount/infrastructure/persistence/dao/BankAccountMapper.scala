@@ -20,6 +20,11 @@ object BankAccountMapper {
     BankAccountDAO( entity.number, entity.openDate, status, entity.balance )
   }
 
+  def convertCheckingAccountEntityToDAO( entity: CheckingAccount ): BankAccountDAO = {
+    val status = convertAccountStatusEnumToString( entity.status )
+    BankAccountDAO( entity.number, entity.openDate, status, entity.balance )
+  }
+
   def convertAccountStatusEnumToString( status: AccountStatus ): String = {
     status match {
       case AccountStatus.BLOCKED => "BLOCKED"

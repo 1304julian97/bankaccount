@@ -2,7 +2,7 @@ package com.practice.bankaccount.application.service
 
 import com.practice.bankaccount.domain.model.{ BankAccount, SavingsAccount }
 import com.practice.bankaccount.domain.repository.AccountRepository
-import com.practice.bankaccount.infrastructure.persistence.dao.BankAccountMapper
+import com.practice.bankaccount.infrastructure.persistence.dao.{ BankAccountDAO, BankAccountMapper }
 
 class AccountService {
 
@@ -13,8 +13,8 @@ class AccountService {
 
     }
 
-    repository.upsert( bankAccount ) match {
-      case Right( account ) => Right( s"Account number ${account.number} saved successfully" )
+    repository.upsert( savingsAccountDAO ) match {
+      case Right( account ) => Right( s"Account number ${account.accountNumber} saved successfully" )
       case Left( error )    => Left( new Throwable( error ) )
 
     }
@@ -22,10 +22,10 @@ class AccountService {
   }
 
   def getListAccount( repository: AccountRepository ): Either[Throwable, List[BankAccount]] = {
-    val acountsTry: Either[String, List[BankAccount]] = repository.list()
+    val acountsTry: Either[String, List[BankAccountDAO]] = repository.list()
 
     acountsTry match {
-      case Right( accounts ) => Right( accounts )
+      case Right( accounts ) => Right( accounts.map( ba => BankAccountMapper.convertBankAccountDAOToCheckingAccoutEntity( ba ) ) )
       case Left( error )     => Left( new Throwable( error ) )
     }
   }

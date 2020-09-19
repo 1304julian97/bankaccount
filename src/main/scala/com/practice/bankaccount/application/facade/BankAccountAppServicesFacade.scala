@@ -6,20 +6,20 @@ import com.practice.bankaccount.domain.repository.AccountRepository
 
 object BankAccountAppServicesFacade {
 
-  val accoundService = new AccountService()
+  val accountService = new AccountService()
 
   def getAllBankAccounts( repository: AccountRepository ): RestResponse[List[BankAccountDTO]] = {
-    accoundService.getListAccount( repository ) match {
-      case Right( list ) => RestResponse( list.map( x => MappersDTO.convertBankAccountEntityToDTO( x ) ), null )
-      case Left( e )     => RestResponse( null, e.getMessage )
+    accountService.getListAccount( repository ) match {
+      case Right( list ) => RestResponse( Option( list.map( x => MappersDTO.convertBankAccountEntityToDTO( x ) ) ), None )
+      case Left( e )     => RestResponse( None, Option( e.getMessage ) )
     }
 
   }
 
   def saverUpdateAccount( bankAccountDTO: BankAccountDTO )( repository: AccountRepository ): RestResponse[String] = {
-    accoundService.saveUpdateAccount( MappersDTO.convertBankAccountDTOToSavingAccoutEntity( bankAccountDTO ) )( repository ) match {
-      case Right( s ) => RestResponse( s, null )
-      case Left( e )  => RestResponse( null, e.getMessage )
+    accountService.saveUpdateAccount( MappersDTO.convertBankAccountDTOToSavingAccoutEntity( bankAccountDTO ) )( repository ) match {
+      case Right( s ) => RestResponse( Option( s ), None )
+      case Left( e )  => RestResponse( None, Option( e.getMessage ) )
     }
 
   }
