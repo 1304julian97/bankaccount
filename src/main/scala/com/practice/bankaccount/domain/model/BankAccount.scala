@@ -16,6 +16,7 @@ case class SavingsAccount( number: Int, openDate: LocalDateTime, status: Account
 case class CheckingAccount( number: Int, openDate: LocalDateTime, status: AccountStatus, balance: Int ) extends BankAccount
 
 object BankAccount {
+
   def createSavingsAccount( number: Int, balance: Int ): Either[String, SavingsAccount] = {
     if ( number <= 0 ) {
       Left( "Account number must be greater than 0" )
@@ -25,6 +26,7 @@ object BankAccount {
       Right( SavingsAccount( number, LocalDateTime.now, AccountStatus.ACTIVE, balance ) )
     }
   }
+
   def createCheckingAccount( number: Int, balance: Int ): Either[String, CheckingAccount] = {
     if ( number <= 0 ) {
       Left( "Account number must be greater than 0" )
