@@ -1,5 +1,7 @@
 package com.practice.bankaccount.infrastructure.persistence.repositoryinstances
 
+import java.time.LocalDateTime
+
 import com.practice.bankaccount.domain.repository.AccountRepository
 import com.practice.bankaccount.infrastructure.persistence.dao.BankAccountDAO;
 
@@ -14,6 +16,7 @@ class H2AccountRepository extends AccountRepository {
   }
 
   def list(): Either[String, List[BankAccountDAO]] = {
-    Left( "Something was wrong" )
+    val aacount: BankAccountDAO = BankAccountDAO(123,LocalDateTime.now,"ACTIVE",1234)
+    Right(List(aacount))
   }
 }
