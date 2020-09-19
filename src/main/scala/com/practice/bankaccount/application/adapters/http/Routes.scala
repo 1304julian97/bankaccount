@@ -2,7 +2,7 @@ package com.practice.bankaccount.application.adapters.http
 
 import java.time.ZonedDateTime
 
-import akka.http.scaladsl.model.StatusCodes.OK
+import akka.http.scaladsl.model.StatusCodes.{ Accepted, OK }
 import akka.http.scaladsl.model.{ ContentTypes, HttpEntity }
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Directives.{ concat, get, parameter, pathPrefix }
@@ -22,14 +22,12 @@ trait Routes extends JsonDecoders {
     path( "bank-accounts" ) {
       get {
         val response: RestResponse[List[BankAccountDTO]] = QueryGetAccounts.execute( context )
-        val accounts: List[BankAccountDTO] = response.objectResponse
-        complete( OK -> accounts )
+        complete( OK -> response )
       } ~
         post {
           entity( as[BankAccountDTO] ) { account =>
             val response: RestResponse[String] = CommanUpsertAccounts.execute( account )( context )
-            val createAccountDTO = response.businessException
-            complete( OK -> createAccountDTO )
+            complete( OK -> response )
           }
         }
     } ~
