@@ -2,7 +2,7 @@ package com.practice.bankaccount.domain.service
 
 import com.practice.bankaccount.domain.model.{ BankAccount, CheckingAccount, SavingsAccount, Status }
 import com.practice.bankaccount.domain.repository.AccountRepository
-import com.practice.bankaccount.infrastructure.persistence.inmemory.BankAccountDAOMapperInMemory
+import com.practice.bankaccount.infrastructure.persistence.inmemory.AccountDAOMapperInMemory
 
 object AccountService {
 
