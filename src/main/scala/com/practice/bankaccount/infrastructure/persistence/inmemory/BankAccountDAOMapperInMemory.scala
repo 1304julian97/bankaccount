@@ -1,9 +1,9 @@
-package com.practice.bankaccount.infrastructure.persistence.dao
+package com.practice.bankaccount.infrastructure.persistence.inmemory
 
 import com.practice.bankaccount.domain.model.{ BankAccount, CheckingAccount, SavingsAccount, Status }
 import com.practice.bankaccount.infrastructure.mapper.StatusMapper
 
-trait BankAccountDAOMapper {
+trait BankAccountDAOMapperInMemory {
 
   private def validateStatus( recordStatus: String ): Either[String, Status] = {
     StatusMapper.fromString( recordStatus ) match {
@@ -17,7 +17,7 @@ trait BankAccountDAOMapper {
     else Left( s"Account type '$accountType' is not valid" )
   }
 
-  def mapBankAccountToDAORecord( bankAccoun: BankAccount ): Either[String, BankAccountDAORecord] = {
+  def mapBankAccountToDAORecord( bankAccoun: BankAccount ): Either[String, BankAccountDAORecordInMemory] = {
     val accountType: String = bankAccoun match {
       case acc: SavingsAccount  => "Savings"
       case acc: CheckingAccount => "Checking"
@@ -28,10 +28,10 @@ trait BankAccountDAOMapper {
     }
     val status: String = StatusMapper.toString( bankAccoun.status )
 
-    Right( BankAccountDAORecord( accountType, bankAccoun.number, bankAccoun.openDate, status, bankAccoun.balance, rate ) )
+    Right( BankAccountDAORecordInMemory( accountType, bankAccoun.number, bankAccoun.openDate, status, bankAccoun.balance, rate ) )
   }
 
-  def mapDAORecordToBankAccount( record: BankAccountDAORecord ): Either[String, BankAccount] = {
+  def mapDAORecordToBankAccount( record: BankAccountDAORecordInMemory ): Either[String, BankAccount] = {
     for {
       status <- validateStatus( record.status )
       accType <- validateType( record.`type` )
