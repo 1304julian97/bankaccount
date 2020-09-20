@@ -1,11 +1,12 @@
 package com.practice.bankaccount.infrastructure.persistence.dao
 
 import com.practice.bankaccount.domain.model.{ BankAccount, CheckingAccount, SavingsAccount, Status }
+import com.practice.bankaccount.infrastructure.mapper.StatusMapper
 
 trait BankAccountDAOMapper {
 
   private def validateStatus( recordStatus: String ): Either[String, Status] = {
-    Status.fromString( recordStatus ) match {
+    StatusMapper.fromString( recordStatus ) match {
       case Some( status ) => Right( status )
       case None           => Left( s"Record status '$recordStatus' is not valid" )
     }
@@ -25,7 +26,7 @@ trait BankAccountDAOMapper {
       case acc: SavingsAccount => acc.rate
       case _                   => 0.0
     }
-    val status: String = Status.toString( bankAccoun.status )
+    val status: String = StatusMapper.toString( bankAccoun.status )
 
     Right( BankAccountDAORecord( accountType, bankAccoun.number, bankAccoun.openDate, status, bankAccoun.balance, rate ) )
   }
