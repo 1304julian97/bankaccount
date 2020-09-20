@@ -2,7 +2,7 @@ package com.practice.bankaccount.infrastructure.persistence.h2
 
 import com.practice.bankaccount.domain.model.BankAccount
 import com.practice.bankaccount.domain.repository.AccountRepository
-import com.practice.bankaccount.infrastructure.persistence.h2.table.{ AccountDAOMapperH2, AccountDAORecordH2 }
+import com.practice.bankaccount.infrastructure.persistence.h2.table.{ AccountDAOMapperH2, AccountDAORecordH2, H2Tables }
 import com.typesafe.config.{ Config, ConfigFactory }
 
 import scala.concurrent.ExecutionContext.Implicits.global
