@@ -1,11 +1,11 @@
 package com.practice.bankaccount.domain.repository
 
-import com.practice.bankaccount.infrastructure.persistence.dao.BankAccountDAO
+import com.practice.bankaccount.domain.model.BankAccount
 
 trait AccountRepository {
 
-  def upsert( account: BankAccountDAO ): Either[String, BankAccountDAO]
+  def upsert( bankAccount: BankAccount ): Either[String, BankAccount]
 
-  def list(): Either[String, List[BankAccountDAO]]
+  def list(): Either[String, List[BankAccount]]
 
 }

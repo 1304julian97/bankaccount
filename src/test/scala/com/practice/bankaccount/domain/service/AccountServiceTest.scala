@@ -1,9 +1,7 @@
 package com.practice.bankaccount.domain.service
 
-
-import com.practice.bankaccount.domain.model.{AccountStatus, BankAccount}
-import com.practice.bankaccount.infrastructure.persistence.dao.BankAccountDAO
-import com.practice.bankaccount.infrastructure.persistence.repositoryinstances.AccountRepositoryInMemory
+import com.practice.bankaccount.domain.model.{ ACTIVE, BankAccount, Status }
+import com.practice.bankaccount.infrastructure.persistence.AccountRepositoryInMemory
 import org.scalatest.flatspec.AnyFlatSpec
 
 class AccountServiceTest extends AnyFlatSpec {
@@ -16,7 +14,7 @@ class AccountServiceTest extends AnyFlatSpec {
     assert( result.isRight )
     assert( result.right.get.number == 8001 )
     assert( result.right.get.balance == 50000 )
-    assert( result.right.get.status == AccountStatus.ACTIVE )
+    assert( result.right.get.status == ACTIVE )
 
   }
 
@@ -26,12 +24,12 @@ class AccountServiceTest extends AnyFlatSpec {
     val account1 = AccountService.openAccount( 8001, 50000, "S" )( repository )
     val account2 = AccountService.openAccount( 8002, 37000, "C" )( repository )
 
-    val result: Either[String, List[BankAccountDAO]] = repository.list()
+    val result: Either[String, List[BankAccount]] = repository.list()
 
     assert( result.isRight )
     assert( result.right.get.size == 2 )
-    assert( result.right.get.exists( account => account.accountNumber == 8001 ) )
-    assert( result.right.get.exists( account => account.accountNumber == 8002 ) )
+    assert( result.right.get.exists( account => account.number == 8001 ) )
+    assert( result.right.get.exists( account => account.number == 8002 ) )
 
   }
 
