@@ -1,39 +1,48 @@
 package com.practice.bankaccount.application.adapters.http
 
 import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
-import akka.http.scaladsl.model.StatusCodes.{ Accepted, OK }
+import akka.http.scaladsl.model.StatusCodes.{ InternalServerError, OK }
 import akka.http.scaladsl.model.{ ContentTypes, HttpEntity }
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Directives.{ concat, get, parameter, pathPrefix }
 import akka.http.scaladsl.server.Route
-import com.practice.bankaccount.application.PersitenceContext
-import com.practice.bankaccount.application.commandqueries.{ CommanUpsertAccounts, QueryGetAccounts }
-import com.practice.bankaccount.application.dto.{ BankAccountDTO, RestResponse, StatusDTO }
+import com.practice.bankaccount.application.Context
+import com.practice.bankaccount.application.cqrs.{ CommanOpenAccount, QueryGetAccounts }
+import com.practice.bankaccount.application.dto.ApplicationDto._
+import com.practice.bankaccount.application.dto._
+import com.practice.bankaccount.domain.model.BankAccount
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 
-trait Routes extends JsonDecoders {
+trait Routes extends MappersDto with JsonDecoders {
 
-  protected def now: ZonedDateTime = ZonedDateTime.now
+  private def now = ZonedDateTime.now()
 
-  def context: PersitenceContext
+  def context: Context
 
   val route: Route =
     path( "bank-accounts" ) {
       get {
-        val response: RestResponse[List[BankAccountDTO]] = QueryGetAccounts.execute( context )
-        complete( OK -> response )
+        val result: Either[String, List[BankAccount]] = QueryGetAccounts.execute( context )
+        result match {
+          case Right( bankAccounts ) => complete( OK -> GetAccountsResponse( now.toString, bankAccounts.map( mapBankAccountToDTO ) ) )
+          case Left( error )         => complete( InternalServerError -> ErrorResponse( now.toString, error ) )
+        }
       } ~
         post {
-          entity( as[BankAccountDTO] ) { account =>
-            val response: RestResponse[String] = CommanUpsertAccounts.execute( account )( context )
-            complete( OK -> response )
+          entity( as[OpenAccountRequest] ) { request =>
+            val result = CommanOpenAccount.execute( request.number, request.balance, request.accountType )( context )
+            result match {
+              case Right( bankAccount ) => complete( OK -> OpenAccountResponse( now.toString, mapBankAccountToDTO( bankAccount ) ) )
+              case Left( error )        => complete( InternalServerError -> ErrorResponse( now.toString, error ) )
+            }
           }
         }
     } ~
       path( "status" ) {
         get {
-          complete( OK -> StatusDTO( now.toString, "UP!" ) )
+          complete( OK -> GetStatusResponse( now.toString, "UP!" ) )
         }
       }
 
