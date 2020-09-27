@@ -1,4 +1,4 @@
-package com.practice.bankaccount.application
+package com.practice.bankaccount.application.main
 
 import com.practice.bankaccount.domain.repository.AccountRepository
 

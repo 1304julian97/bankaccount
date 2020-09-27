@@ -1,8 +1,8 @@
-package com.practice.bankaccount.infrastructure.persistence.dao
+package com.practice.bankaccount.infrastructure.persistence.inmemory
 
 import java.time.LocalDateTime
 
-case class BankAccountDAORecord(
+case class AccountDAORecordInMemory(
   `type`:   String,
   number:   Int,
   openDate: LocalDateTime,
