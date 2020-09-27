@@ -15,3 +15,6 @@ libraryDependencies ++= Seq(
   "org.scalatest"       %% "scalatest"        % "3.1.2",
   "org.typelevel"       %% "cats-core"        % "2.1.1"
 )
+
+mainClass in (Compile, run) := Some("com.practice.bankaccount.application.main.MainAppH2")
+mainClass in (Compile, packageBin) := Some("com.practice.bankaccount.application.main.MainAppH2")
