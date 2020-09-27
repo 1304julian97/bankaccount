@@ -8,10 +8,10 @@ import akka.http.scaladsl.model.{ ContentTypes, HttpEntity }
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Directives.{ concat, get, parameter, pathPrefix }
 import akka.http.scaladsl.server.Route
-import com.practice.bankaccount.application.Context
 import com.practice.bankaccount.application.cqrs.{ CommanOpenAccount, QueryGetAccounts }
 import com.practice.bankaccount.application.dto.ApplicationDto._
 import com.practice.bankaccount.application.dto._
+import com.practice.bankaccount.application.main.Context
 import com.practice.bankaccount.domain.model.BankAccount
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 

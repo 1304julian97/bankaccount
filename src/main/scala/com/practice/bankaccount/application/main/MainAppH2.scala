@@ -1,16 +1,16 @@
-package com.practice.bankaccount.application
+package com.practice.bankaccount.application.main
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
 import com.practice.bankaccount.application.adapters.http.{ JsonDecoders, Routes }
-import com.practice.bankaccount.infrastructure.context.ContextInMemory
+import com.practice.bankaccount.infrastructure.context.{ ContextInH2, ContextInMemory }
 import com.typesafe.config.{ Config, ConfigFactory }
 
-import scala.concurrent.{ Await, ExecutionContextExecutor }
+import scala.concurrent.ExecutionContextExecutor
 import scala.util.{ Failure, Success }
 
-object MainApp extends App with JsonDecoders with Routes {
+object MainAppH2 extends App with JsonDecoders with Routes {
 
   private val config: Config = ConfigFactory.load()
   private val name: String = config.getString( "app.name" )
@@ -19,7 +19,7 @@ object MainApp extends App with JsonDecoders with Routes {
   implicit val materializer: ActorMaterializer = ActorMaterializer()
   implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
-  val context: Context = new ContextInMemory()
+  val context: Context = new ContextInH2
 
   println( s"Running application $name" )
   val server = Http().bindAndHandle( route, "localhost", 8080 )
