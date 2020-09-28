@@ -4,12 +4,15 @@ import com.practice.bankaccount.domain.model.{ ACTIVE, BankAccount, Status }
 import com.practice.bankaccount.infrastructure.persistence.inmemory.AccountRepositoryInMemory
 import org.scalatest.flatspec.AnyFlatSpec
 
+import scala.concurrent.Future
+
 class AccountServiceTest extends AnyFlatSpec {
 
   "AccountService" should "save a new account" in {
 
     val repository = new AccountRepositoryInMemory()
-    val result: Either[String, BankAccount] = AccountService.openAccount( 8001, 50000, "S" )( repository )
+    val rawResult: Future[Either[String, BankAccount]] = AccountService.openAccount( 8001, 50000, "S" )( repository )
+    val result = rawResult.value.get.get
 
     assert( result.isRight )
     assert( result.right.get.number == 8001 )
