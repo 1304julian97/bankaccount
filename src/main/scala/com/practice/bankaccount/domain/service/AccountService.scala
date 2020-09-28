@@ -1,8 +1,10 @@
 package com.practice.bankaccount.domain.service
 
-import com.practice.bankaccount.domain.model.{ BankAccount, CheckingAccount, SavingsAccount, Status }
+import com.practice.bankaccount.domain.model.BankAccount
 import com.practice.bankaccount.domain.repository.AccountRepository
-import com.practice.bankaccount.infrastructure.persistence.inmemory.AccountDAOMapperInMemory
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 object AccountService {
 
@@ -11,23 +13,29 @@ object AccountService {
     else Right( accountType )
   }
 
-  def openAccount( number: Int, balance: Int, accountType: String )( repository: AccountRepository ): Either[String, BankAccount] = {
+  def openAccount( number: Int, balance: Int, accountType: String )( repository: AccountRepository ): Future[Either[String, BankAccount]] = {
 
     val defaultRate: Double = 0.0
+    val validatedType = Future( checkAccountType( accountType ) )
 
     for {
-      validType <- checkAccountType( accountType )
+      validType <- validatedType
       newAccount <- {
-        if ( validType == "S" ) BankAccount.createSavingsAccount( number, balance, defaultRate )
-        else BankAccount.createCheckingAccount( number, balance )
+        if ( validType == "S" ) Future( BankAccount.createSavingsAccount( number, balance, defaultRate ) )
+        else Future( BankAccount.createCheckingAccount( number, balance ) )
       }
-      savedAccount <- repository.upsert( newAccount )
+      savedAccount <- {
+        Future( repository.upsert( newAccount match {
+          case Right( bank ) => bank
+          case Left( msg )   => throw new Exception( msg )
+        } ) )
+      }
     } yield savedAccount
 
   }
 
-  def listAcounts()( repository: AccountRepository ): Either[String, List[BankAccount]] = {
-    repository.list()
+  def listAcounts()( repository: AccountRepository ): Future[Either[String, List[BankAccount]]] = {
+    Future( repository.list() )
   }
 
 }
