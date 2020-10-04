@@ -9,8 +9,8 @@ import scala.concurrent.Future
 object AccountService {
 
   private def checkAccountType( accountType: String ): Either[String, String] = {
-    if ( accountType != "S" && accountType != "C" ) Left( s"Account type '$accountType' to open is not valid" )
-    else Right( accountType )
+    if ( accountType == "S" || accountType == "C" ) Right( accountType )
+    else Left( s"Account type '$accountType' to open is not valid" )
   }
 
   def openAccount( number: Int, balance: Int, accountType: String )( repository: AccountRepository ): Future[Either[String, BankAccount]] = {
@@ -25,17 +25,17 @@ object AccountService {
         else Future( BankAccount.createCheckingAccount( number, balance ) )
       }
       savedAccount <- {
-        Future( repository.upsert( newAccount match {
+        repository.upsert( newAccount match {
           case Right( bank ) => bank
           case Left( msg )   => throw new Exception( msg )
-        } ) )
+        } )
       }
     } yield savedAccount
 
   }
 
   def listAcounts()( repository: AccountRepository ): Future[Either[String, List[BankAccount]]] = {
-    Future( repository.list() )
+    repository.list()
   }
 
 }
