@@ -8,27 +8,27 @@ import scala.concurrent.Future
 
 object AccountService {
 
-  private def checkAccountType( accountType: String ): Either[String, String] = {
+  private def checkAccountType( accountType: String ): Future[Either[String, String]] = Future {
     if ( accountType == "S" || accountType == "C" ) Right( accountType )
     else Left( s"Account type '$accountType' to open is not valid" )
   }
 
   def openAccount( number: Int, balance: Int, accountType: String )( repository: AccountRepository ): Future[Either[String, BankAccount]] = {
 
-    val defaultRate: Double = 0.0
-    val validatedType = Future( checkAccountType( accountType ) )
-
     for {
-      validType <- validatedType
-      newAccount <- {
-        if ( validType == "S" ) Future( BankAccount.createSavingsAccount( number, balance, defaultRate ) )
-        else Future( BankAccount.createCheckingAccount( number, balance ) )
+      validationResult <- checkAccountType( accountType )
+      newAccount <- Future {
+        validationResult match {
+          case Right( "S" )         => BankAccount.createSavingsAccount( number, balance, 0.0 )
+          case Right( "C" )         => BankAccount.createCheckingAccount( number, balance )
+          case Left( errorMessage ) => Left( errorMessage )
+        }
       }
       savedAccount <- {
-        repository.upsert( newAccount match {
-          case Right( bank ) => bank
-          case Left( msg )   => throw new Exception( msg )
-        } )
+        newAccount match {
+          case Right( account )     => repository.upsert( account )
+          case Left( errorMessage ) => Future( Left( errorMessage ) )
+        }
       }
     } yield savedAccount
 
