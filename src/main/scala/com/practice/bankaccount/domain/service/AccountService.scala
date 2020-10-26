@@ -41,16 +41,15 @@ object AccountService {
     repository.list()
   }
 
-  def filterAccountByBalanceLimit(balanceLimit: Int)(repository: AccountRepository): Future[Either[String, List[BankAccount]]] = {
+  def filterAccountByBalanceLimit( balanceLimit: Int )( repository: AccountRepository ): Future[Either[String, List[BankAccount]]] = {
+    val f: List[BankAccount] => Future[Either[String, List[BankAccount]]] = ( accounts: List[BankAccount] ) => Future.successful( Right( accounts.filter( _.balance <= balanceLimit ) ) )
 
     val accountsFiltered = for {
-      accounts <- EitherT(listAcounts()(repository))
-      filter <- EitherT.rightT(accounts.filter(_.balance <= balanceLimit))
+      accounts <- EitherT( listAcounts()( repository ) )
+      filter <- EitherT( f.apply( accounts ) )
     } yield filter
     accountsFiltered.value
 
-
   }
-
 
 }

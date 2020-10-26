@@ -8,8 +8,8 @@ import scala.concurrent.Future
 
 object QueryFilterAccount {
 
-  def execute(balanceLimit: Int)(context:Context): Future[Either[String, List[BankAccount]]] = {
-    AccountService.filterAccountByBalanceLimit(balanceLimit)(context.accountRepository)
+  def execute( balanceLimit: Int )( context: Context ): Future[Either[String, List[BankAccount]]] = {
+    AccountService.filterAccountByBalanceLimit( balanceLimit )( context.accountRepository )
   }
 
 }
