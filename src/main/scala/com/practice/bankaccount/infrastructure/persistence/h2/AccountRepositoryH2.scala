@@ -3,14 +3,11 @@ package com.practice.bankaccount.infrastructure.persistence.h2
 import com.practice.bankaccount.domain.model.BankAccount
 import com.practice.bankaccount.domain.repository.AccountRepository
 import com.practice.bankaccount.infrastructure.persistence.h2.table.{ AccountDAOMapperH2, AccountDAORecordH2, H2Tables }
-import com.typesafe.config.{ Config, ConfigFactory }
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ Await, Future }
 import scala.concurrent.duration._
 import slick.jdbc.H2Profile.api._
-
-import scala.util.{ Failure, Success }
 
 class AccountRepositoryH2 extends AccountRepository with AccountDAOMapperH2 {
 
@@ -18,24 +15,26 @@ class AccountRepositoryH2 extends AccountRepository with AccountDAOMapperH2 {
   private val action = H2Tables.bankAccounts.schema.create
   Await.ready( db.run( action ), 5.seconds )
 
-  def upsert( bankAccount: BankAccount ): Either[String, BankAccount] = {
+  def upsert( bankAccount: BankAccount ): Future[Either[String, BankAccount]] = {
     val result: Either[String, AccountDAORecordH2] = fromBankAccountToDAORecord( bankAccount )
 
-    if ( result.isRight ) {
-      val record: AccountDAORecordH2 = result.right.get
+    Future {
+      if ( result.isRight ) {
+        val record: AccountDAORecordH2 = result.right.get
 
-      val dbAction = H2Tables.bankAccounts.+=( record )
+        val dbAction = H2Tables.bankAccounts.+=( record )
 
-      val futureResult: Future[BankAccount] = db.run( dbAction ).map { result => bankAccount }
-      Await.ready( futureResult, 5.seconds )
+        val futureResult: Future[BankAccount] = db.run( dbAction ).map { result => bankAccount }
+        Await.ready( futureResult, 5.seconds )
 
-      Right( bankAccount )
-    } else {
-      Left( result.left.get )
+        Right( bankAccount )
+      } else {
+        Left( result.left.get )
+      }
     }
   }
 
-  def list(): Either[String, List[BankAccount]] = {
+  def list(): Future[Either[String, List[BankAccount]]] = {
     val dbAction = H2Tables.bankAccounts.result
 
     val futureAccounts: Future[List[BankAccount]] = db.run( dbAction ).map { dbRecords =>
@@ -44,9 +43,10 @@ class AccountRepositoryH2 extends AccountRepository with AccountDAOMapperH2 {
         .map( result => result.right.get )
     }
 
-    val accounts: List[BankAccount] = Await.result( futureAccounts, 5.seconds )
+    //val accounts: List[BankAccount] = Await.result( futureAccounts, 5.seconds )
 
-    Right( accounts )
+    //Right( accounts )
+    futureAccounts.map( list => Right( list ) )
   }
 
 }

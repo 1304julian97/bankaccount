@@ -4,9 +4,11 @@ import com.practice.bankaccount.application.main.Context
 import com.practice.bankaccount.domain.model.BankAccount
 import com.practice.bankaccount.domain.service.AccountService
 
+import scala.concurrent.Future
+
 object QueryGetAccounts {
 
-  def execute( context: Context ): Either[String, List[BankAccount]] = {
+  def execute( context: Context ): Future[Either[String, List[BankAccount]]] = {
     AccountService.listAcounts()( context.accountRepository )
   }
 
