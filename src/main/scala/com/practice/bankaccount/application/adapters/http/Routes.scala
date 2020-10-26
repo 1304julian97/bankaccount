@@ -1,19 +1,21 @@
 package com.practice.bankaccount.application.adapters.http
 
 import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
+import java.util.UUID
 
-import akka.http.scaladsl.model.StatusCodes.{ InternalServerError, OK }
-import akka.http.scaladsl.model.{ ContentTypes, HttpEntity }
+import akka.http.scaladsl.model.StatusCodes.{ InternalServerError, OK, RequestTimeout }
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Directives.{ concat, get, parameter, pathPrefix }
-import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.server.Directives.{ get }
+import akka.http.scaladsl.server.{ Route }
 import com.practice.bankaccount.application.cqrs.{ CommanOpenAccount, QueryGetAccounts }
 import com.practice.bankaccount.application.dto.ApplicationDto._
 import com.practice.bankaccount.application.dto._
 import com.practice.bankaccount.application.main.Context
 import com.practice.bankaccount.domain.model.BankAccount
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import org.slf4j.LoggerFactory
+import scala.concurrent.{ Future }
+import scala.util.{ Failure, Success }
 
 trait Routes extends MappersDto with JsonDecoders {
 
@@ -24,18 +26,29 @@ trait Routes extends MappersDto with JsonDecoders {
   val route: Route =
     path( "bank-accounts" ) {
       get {
-        val result: Either[String, List[BankAccount]] = QueryGetAccounts.execute( context )
-        result match {
-          case Right( bankAccounts ) => complete( OK -> GetAccountsResponse( now.toString, bankAccounts.map( mapBankAccountToDTO ) ) )
-          case Left( error )         => complete( InternalServerError -> ErrorResponse( now.toString, error ) )
+        val result: Future[Either[String, List[BankAccount]]] = QueryGetAccounts.execute( context )
+
+        onComplete( result ) {
+          case Success( Right( list ) )        => complete( OK -> GetAccountsResponse( now.toString, list.map( mapBankAccountToDTO ) ) )
+          case Success( Left( errorMessage ) ) => complete( InternalServerError -> ErrorResponse( now.toString, errorMessage ) )
+          case Failure( ex ) =>
+            val messageId: String = UUID.randomUUID().toString
+            LoggerFactory.getLogger( "Routes.class" ).error( s"Something was wrong, Use this code: $messageId", ex )
+            complete( RequestTimeout -> ErrorResponse( now.toString, "Something was wrong" ) )
         }
+
       } ~
         post {
           entity( as[OpenAccountRequest] ) { request =>
             val result = CommanOpenAccount.execute( request.number, request.balance, request.accountType )( context )
-            result match {
-              case Right( bankAccount ) => complete( OK -> OpenAccountResponse( now.toString, mapBankAccountToDTO( bankAccount ) ) )
-              case Left( error )        => complete( InternalServerError -> ErrorResponse( now.toString, error ) )
+
+            onComplete( result ) {
+              case Success( Right( bankAccount ) ) => complete( OK -> OpenAccountResponse( now.toString, mapBankAccountToDTO( bankAccount ) ) )
+              case Success( Left( errorMessage ) ) => complete( InternalServerError -> ErrorResponse( now.toString, errorMessage ) )
+              case Failure( ex ) =>
+                val messageId: String = UUID.randomUUID().toString
+                LoggerFactory.getLogger( "Routes.class" ).error( s"Something was wrong, Use this code: $messageId", ex )
+                complete( RequestTimeout -> ErrorResponse( now.toString, "Something was wrong" ) )
             }
           }
         }

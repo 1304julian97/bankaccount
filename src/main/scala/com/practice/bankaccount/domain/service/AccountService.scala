@@ -1,32 +1,40 @@
 package com.practice.bankaccount.domain.service
 
-import com.practice.bankaccount.domain.model.{ BankAccount, CheckingAccount, SavingsAccount, Status }
+import com.practice.bankaccount.domain.model.BankAccount
 import com.practice.bankaccount.domain.repository.AccountRepository
-import com.practice.bankaccount.infrastructure.persistence.inmemory.AccountDAOMapperInMemory
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 object AccountService {
 
-  private def checkAccountType( accountType: String ): Either[String, String] = {
-    if ( accountType != "S" && accountType != "C" ) Left( s"Account type '$accountType' to open is not valid" )
-    else Right( accountType )
+  private def checkAccountType( accountType: String ): Future[Either[String, String]] = Future {
+    if ( accountType == "S" || accountType == "C" ) Right( accountType )
+    else Left( s"Account type '$accountType' to open is not valid" )
   }
 
-  def openAccount( number: Int, balance: Int, accountType: String )( repository: AccountRepository ): Either[String, BankAccount] = {
-
-    val defaultRate: Double = 0.0
+  def openAccount( number: Int, balance: Int, accountType: String )( repository: AccountRepository ): Future[Either[String, BankAccount]] = {
 
     for {
-      validType <- checkAccountType( accountType )
-      newAccount <- {
-        if ( validType == "S" ) BankAccount.createSavingsAccount( number, balance, defaultRate )
-        else BankAccount.createCheckingAccount( number, balance )
+      validationResult <- checkAccountType( accountType )
+      newAccount <- Future {
+        validationResult match {
+          case Right( "S" )         => BankAccount.createSavingsAccount( number, balance, 0.0 )
+          case Right( "C" )         => BankAccount.createCheckingAccount( number, balance )
+          case Left( errorMessage ) => Left( errorMessage )
+        }
       }
-      savedAccount <- repository.upsert( newAccount )
+      savedAccount <- {
+        newAccount match {
+          case Right( account )     => repository.upsert( account )
+          case Left( errorMessage ) => Future( Left( errorMessage ) )
+        }
+      }
     } yield savedAccount
 
   }
 
-  def listAcounts()( repository: AccountRepository ): Either[String, List[BankAccount]] = {
+  def listAcounts()( repository: AccountRepository ): Future[Either[String, List[BankAccount]]] = {
     repository.list()
   }
 
