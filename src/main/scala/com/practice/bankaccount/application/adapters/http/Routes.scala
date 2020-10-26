@@ -37,20 +37,6 @@ trait Routes extends MappersDto with JsonDecoders {
             complete( RequestTimeout -> ErrorResponse( now.toString, "Something was wrong" ) )
         }
 
-        /*val responseRaw: Future[StandardRoute] = result.map {
-          case Right( list )       => complete( OK -> GetAccountsResponse( now.toString, list.map( mapBankAccountToDTO ) ) )
-          case Left( erroMessage ) => complete( InternalServerError -> ErrorResponse( now.toString, erroMessage ) )
-        }
-        val finalResponse = Try( Await.result( responseRaw, 5.seconds ) )
-
-        finalResponse match {
-          case Success( value ) => value
-          case Failure(ex) => {
-            val messageId:String = UUID.randomUUID().toString
-            LoggerFactory.getLogger("Routes.class").error(s"Something was wrong, Use this code: $messageId",ex)
-            complete(RequestTimeout -> ErrorResponse(now.toString, "Something was wrong"))
-          }
-        }*/
       } ~
         post {
           entity( as[OpenAccountRequest] ) { request =>
