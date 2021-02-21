@@ -2,6 +2,7 @@ package com.practice.bankaccount.domain.service
 
 import com.practice.bankaccount.domain.model.BankAccount
 import com.practice.bankaccount.domain.repository.AccountRepository
+import monix.eval.Task
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -34,7 +35,7 @@ object AccountService {
 
   }
 
-  def listAcounts()( repository: AccountRepository ): Future[Either[String, List[BankAccount]]] = {
+  def listAcounts()( repository: AccountRepository ): Task[Either[String, List[BankAccount]]] = {
     repository.list()
   }
 
