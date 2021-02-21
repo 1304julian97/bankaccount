@@ -3,6 +3,7 @@ package com.practice.bankaccount.infrastructure.persistence.h2
 import com.practice.bankaccount.domain.model.BankAccount
 import com.practice.bankaccount.domain.repository.AccountRepository
 import com.practice.bankaccount.infrastructure.persistence.h2.table.{ AccountDAOMapperH2, AccountDAORecordH2, H2Tables }
+import monix.eval.Task
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ Await, Future }
@@ -34,13 +35,15 @@ class AccountRepositoryH2 extends AccountRepository with AccountDAOMapperH2 {
     }
   }
 
-  def list(): Future[Either[String, List[BankAccount]]] = {
+  def list(): Task[Either[String, List[BankAccount]]] = {
     val dbAction = H2Tables.bankAccounts.result
 
-    val futureAccounts: Future[List[BankAccount]] = db.run( dbAction ).map { dbRecords =>
-      dbRecords.toList.map( fromDAORecordToBankAccount )
-        .filter( result => result.isRight )
-        .map( result => result.right.get )
+    val futureAccounts: Task[List[BankAccount]] = Task.deferFuture {
+      db.run( dbAction ).map { dbRecords =>
+        dbRecords.toList.map( fromDAORecordToBankAccount )
+          .filter( result => result.isRight )
+          .map( result => result.right.get )
+      }
     }
 
     //val accounts: List[BankAccount] = Await.result( futureAccounts, 5.seconds )

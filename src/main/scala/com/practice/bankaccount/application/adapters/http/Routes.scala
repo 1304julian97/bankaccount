@@ -3,11 +3,11 @@ package com.practice.bankaccount.application.adapters.http
 import java.time.ZonedDateTime
 import java.util.UUID
 
-import akka.http.scaladsl.model.StatusCodes.{InternalServerError, OK, RequestTimeout}
+import akka.http.scaladsl.model.StatusCodes.{ InternalServerError, OK, RequestTimeout }
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Directives.get
 import akka.http.scaladsl.server.Route
-import com.practice.bankaccount.application.cqrs.{CommanOpenAccount, QueryGetAccounts}
+import com.practice.bankaccount.application.cqrs.{ CommanOpenAccount, QueryGetAccounts }
 import com.practice.bankaccount.application.dto.ApplicationDto._
 import com.practice.bankaccount.application.dto._
 import com.practice.bankaccount.application.main.Context
@@ -29,14 +29,14 @@ trait Routes extends MappersDto with JsonDecoders {
   val route: Route =
     path( "bank-accounts" ) {
       get {
-        val result: Task[Either[String, List[BankAccount]]] = QueryGetAccounts.execute( context ).timeout(10.seconds).
-        doOnCancel(Task{
-          val messageId: String = UUID.randomUUID().toString
-          LoggerFactory.getLogger( "Routes.class" ).error( s"Time Out getting banks accounts, Use this code: $messageId" )
-          complete( RequestTimeout -> ErrorResponse( now.toString, "Something was wrong" ) )
-        })
+        val result: Task[Either[String, List[BankAccount]]] = QueryGetAccounts.execute( context ).timeout( 10.seconds ).
+          doOnCancel( Task {
+            val messageId: String = UUID.randomUUID().toString
+            LoggerFactory.getLogger( "Routes.class" ).error( s"Time Out getting banks accounts, Use this code: $messageId" )
+            complete( RequestTimeout -> ErrorResponse( now.toString, "Something was wrong" ) )
+          } )
 
-        onComplete(result.runToFuture)  {
+        onComplete( result.runToFuture ) {
           case Success( Right( list ) )        => complete( OK -> GetAccountsResponse( now.toString, list.map( mapBankAccountToDTO ) ) )
           case Success( Left( errorMessage ) ) => complete( InternalServerError -> ErrorResponse( now.toString, errorMessage ) )
           case Failure( ex ) =>
