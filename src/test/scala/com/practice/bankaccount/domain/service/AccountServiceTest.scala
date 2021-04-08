@@ -3,8 +3,9 @@ package com.practice.bankaccount.domain.service
 import com.practice.bankaccount.domain.model.{ ACTIVE, BankAccount, Status }
 import com.practice.bankaccount.infrastructure.persistence.h2.AccountRepositoryH2
 import com.practice.bankaccount.infrastructure.persistence.inmemory.AccountRepositoryInMemory
+import monix.eval.Task
 import org.scalatest.flatspec.AnyFlatSpec
-
+import monix.execution.Scheduler.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{ Await, Future }
 
@@ -31,7 +32,8 @@ class AccountServiceTest extends AnyFlatSpec {
     val account1 = AccountService.openAccount( 8001, 50000, "S" )( repository )
     val account2 = AccountService.openAccount( 8002, 37000, "C" )( repository )
 
-    val resultRaw: Future[Either[String, List[BankAccount]]] = repository.list()
+    val resultRawTask: Task[Either[String, List[BankAccount]]] = repository.list()
+    val resultRaw = resultRawTask.runToFuture
     val result = Await.result( resultRaw, 5.seconds )
 
     assert( result.isRight )

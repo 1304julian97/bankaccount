@@ -2,6 +2,8 @@ package com.practice.bankaccount.infrastructure.persistence.inmemory
 
 import com.practice.bankaccount.domain.model.BankAccount
 import com.practice.bankaccount.domain.repository.AccountRepository
+import monix.eval.Task
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.collection.mutable
 import scala.concurrent.Future
@@ -23,7 +25,7 @@ class AccountRepositoryInMemory extends AccountRepository with AccountDAOMapperI
     }
   }
 
-  def list(): Future[Either[String, List[BankAccount]]] = {
+  def list(): Task[Either[String, List[BankAccount]]] = {
     val resultSet: List[Either[String, BankAccount]] = records.values.toList
       .map( record => fromDAORecordToBankAccount( record ) )
 
@@ -31,7 +33,7 @@ class AccountRepositoryInMemory extends AccountRepository with AccountDAOMapperI
       .filter( result => result.isRight )
       .map( result => result.right.get )
 
-    Future( Right( accounts ) )
+    Task( Right( accounts ) )
   }
 
 }
