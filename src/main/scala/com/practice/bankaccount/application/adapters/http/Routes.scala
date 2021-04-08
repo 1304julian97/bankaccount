@@ -13,7 +13,10 @@ import com.practice.bankaccount.application.dto._
 import com.practice.bankaccount.application.main.Context
 import com.practice.bankaccount.domain.model.BankAccount
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import monix.eval.Task
 import org.slf4j.LoggerFactory
+import monix.execution.Scheduler.Implicits.global
+import org.scalatest.time.SpanSugar.convertIntToGrainOfTime
 
 import scala.concurrent.Future
 import scala.util.{ Failure, Success }
@@ -27,9 +30,14 @@ trait Routes extends MappersDto with JsonDecoders {
   val route: Route =
     path( "bank-accounts" ) {
       get {
-        val result: Future[Either[String, List[BankAccount]]] = QueryGetAccounts.execute( context )
+        val result: Task[Either[String, List[BankAccount]]] = QueryGetAccounts.execute( context ).timeout( 10.seconds ).
+          doOnCancel( Task {
+            val messageId: String = UUID.randomUUID().toString
+            LoggerFactory.getLogger( "Routes.class" ).error( s"Time Out getting banks accounts, Use this code: $messageId" )
+            complete( RequestTimeout -> ErrorResponse( now.toString, "Something was wrong" ) )
+          } )
 
-        onComplete( result ) {
+        onComplete( result.runToFuture ) {
           case Success( Right( list ) )        => complete( OK -> GetAccountsResponse( now.toString, list.map( mapBankAccountToDTO ) ) )
           case Success( Left( errorMessage ) ) => complete( InternalServerError -> ErrorResponse( now.toString, errorMessage ) )
           case Failure( ex ) =>
@@ -42,8 +50,14 @@ trait Routes extends MappersDto with JsonDecoders {
         //bank-accounts/qtyLimit={someNumber}
         headerValueByName( "token" ) { token =>
           parameter( "qtyLimit" ) { qtyLimit =>
-            val result: Future[Either[String, List[BankAccount]]] = QueryFilterAccount.execute( qtyLimit.toInt )( context )
-            onComplete( result ) {
+            val result: Task[Either[String, List[BankAccount]]] = QueryFilterAccount.execute( qtyLimit.toInt )( context ).timeout( 10.seconds )
+              .doOnCancel( Task {
+                val messageId: String = UUID.randomUUID().toString
+                LoggerFactory.getLogger( "Routes.class" ).error( s"Time out limit getting accounts with balance greater than $qtyLimit, Use this code: $messageId" )
+                complete( RequestTimeout -> ErrorResponse( now.toString, "Something was wrong" ) )
+              } )
+
+            onComplete( result.runToFuture ) {
               case Success( Right( list ) )        => complete( OK -> GetAccountsResponse( now.toString, list.map( mapBankAccountToDTO ) ) )
               case Success( Left( errorMessage ) ) => complete( InternalServerError -> ErrorResponse( now.toString, errorMessage ) )
               case Failure( ex ) =>

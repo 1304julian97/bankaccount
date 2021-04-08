@@ -13,7 +13,8 @@ libraryDependencies ++= Seq(
   "com.typesafe.slick"  %% "slick"            % "3.3.0",
   "de.heikoseeberger"   %% "akka-http-circe"  % "1.20.1",
   "org.scalatest"       %% "scalatest"        % "3.1.2",
-  "org.typelevel"       %% "cats-core"        % "2.1.1"
+  "org.typelevel"       %% "cats-core"        % "2.1.1",
+  "io.monix"            %% "monix"            % "3.3.0"
 )
 
 mainClass in (Compile, run) := Some("com.practice.bankaccount.application.main.MainAppH2")
