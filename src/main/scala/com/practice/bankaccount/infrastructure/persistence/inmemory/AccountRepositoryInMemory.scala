@@ -36,4 +36,10 @@ class AccountRepositoryInMemory extends AccountRepository with AccountDAOMapperI
     Task( Right( accounts ) )
   }
 
+  override def getAccount( accountNumber: Int ): Task[Either[String, BankAccount]] = {
+    records.values.find( _.number == accountNumber ) match {
+      case Some( value ) => Task( fromDAORecordToBankAccount( value ) )
+      case _             => Task( Left( s"The account with the number: $accountNumber does not exist." ) )
+    }
+  }
 }

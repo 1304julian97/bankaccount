@@ -11,4 +11,6 @@ trait AccountRepository {
 
   def list(): Task[Either[String, List[BankAccount]]]
 
+  def getAccount( accountNumber: Int ): Task[Either[String, BankAccount]]
+
 }
