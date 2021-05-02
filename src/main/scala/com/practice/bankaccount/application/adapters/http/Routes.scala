@@ -3,15 +3,16 @@ package com.practice.bankaccount.application.adapters.http
 import java.time.ZonedDateTime
 import java.util.UUID
 
-import akka.http.scaladsl.model.StatusCodes.{ InternalServerError, OK, RequestTimeout }
+import akka.http.scaladsl.model.StatusCodes.{ InternalServerError, NotFound, OK, RequestTimeout }
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Directives.get
 import akka.http.scaladsl.server.Route
-import com.practice.bankaccount.application.cqrs.{ CommanOpenAccount, QueryFilterAccount, QueryGetAccounts }
+import com.practice.bankaccount.application.cqrs.{ CommanOpenAccount, QueryFilterAccount, QueryGetAccounts, QueryGetPersonalAccount }
 import com.practice.bankaccount.application.dto.ApplicationDto._
 import com.practice.bankaccount.application.dto._
 import com.practice.bankaccount.application.main.Context
 import com.practice.bankaccount.domain.model.BankAccount
+import com.practice.bankaccount.infrastructure.Logger.Logger
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import monix.eval.Task
 import org.slf4j.LoggerFactory
@@ -21,7 +22,7 @@ import org.scalatest.time.SpanSugar.convertIntToGrainOfTime
 import scala.concurrent.Future
 import scala.util.{ Failure, Success }
 
-trait Routes extends MappersDto with JsonDecoders {
+trait Routes extends MappersDto with JsonDecoders with Logger {
 
   private def now = ZonedDateTime.now()
 
@@ -33,7 +34,7 @@ trait Routes extends MappersDto with JsonDecoders {
         val result: Task[Either[String, List[BankAccount]]] = QueryGetAccounts.execute( context ).timeout( 10.seconds ).
           doOnCancel( Task {
             val messageId: String = UUID.randomUUID().toString
-            LoggerFactory.getLogger( "Routes.class" ).error( s"Time Out getting banks accounts, Use this code: $messageId" )
+            log( s"Time Out getting banks accounts, Use this code: $messageId" )
             complete( RequestTimeout -> ErrorResponse( now.toString, "Something was wrong" ) )
           } )
 
@@ -42,7 +43,7 @@ trait Routes extends MappersDto with JsonDecoders {
           case Success( Left( errorMessage ) ) => complete( InternalServerError -> ErrorResponse( now.toString, errorMessage ) )
           case Failure( ex ) =>
             val messageId: String = UUID.randomUUID().toString
-            LoggerFactory.getLogger( "Routes.class" ).error( s"Something was wrong, Use this code: $messageId", ex )
+            logError( s"Something was wrong, Use this code: $messageId" )( ex )
             complete( RequestTimeout -> ErrorResponse( now.toString, "Something was wrong" ) )
         }
 
@@ -53,7 +54,7 @@ trait Routes extends MappersDto with JsonDecoders {
             val result: Task[Either[String, List[BankAccount]]] = QueryFilterAccount.execute( qtyLimit.toInt )( context ).timeout( 10.seconds )
               .doOnCancel( Task {
                 val messageId: String = UUID.randomUUID().toString
-                LoggerFactory.getLogger( "Routes.class" ).error( s"Time out limit getting accounts with balance greater than $qtyLimit, Use this code: $messageId" )
+                log( s"Time out limit getting accounts with balance greater than $qtyLimit, Use this code: $messageId" )
                 complete( RequestTimeout -> ErrorResponse( now.toString, "Something was wrong" ) )
               } )
 
@@ -62,7 +63,7 @@ trait Routes extends MappersDto with JsonDecoders {
               case Success( Left( errorMessage ) ) => complete( InternalServerError -> ErrorResponse( now.toString, errorMessage ) )
               case Failure( ex ) =>
                 val messageId: String = UUID.randomUUID().toString
-                LoggerFactory.getLogger( "Routes.class" ).error( s"Something was wrong getting accounts with balance greater than $qtyLimit, Use this code: $messageId", ex )
+                logError( s"Something was wrong getting accounts with balance greater than $qtyLimit, Use this code: $messageId" )( ex )
                 complete( RequestTimeout -> ErrorResponse( now.toString, "Something was wrong" ) )
 
             }
@@ -79,12 +80,28 @@ trait Routes extends MappersDto with JsonDecoders {
               case Success( Left( errorMessage ) ) => complete( InternalServerError -> ErrorResponse( now.toString, errorMessage ) )
               case Failure( ex ) =>
                 val messageId: String = UUID.randomUUID().toString
-                LoggerFactory.getLogger( "Routes.class" ).error( s"Something was wrong, Use this code: $messageId", ex )
+                logError( s"Something was wrong, Use this code: $messageId" )( ex )
                 complete( RequestTimeout -> ErrorResponse( now.toString, "Something was wrong" ) )
             }
           }
         }
     } ~
+      path( "personal-account" / IntNumber ) { accountNumber =>
+        get {
+          val result = QueryGetPersonalAccount.execute( accountNumber )( context ).runToFuture
+
+          onComplete( result ) {
+            case Success( Right( bankAccount ) ) => complete( OK -> mapBankAccountToDTO( bankAccount ) )
+            case Success( Left( errorMessage ) ) => complete( NotFound -> ErrorResponse( now.toString, errorMessage ) )
+            case Failure( ex ) =>
+              val messageId: String = UUID.randomUUID().toString
+              logError( s"Something was wrong, Use this code: $messageId" )( ex )
+              complete( InternalServerError -> ErrorResponse( now.toString, s"Something was wrong getting the account number $accountNumber" ) )
+          }
+
+        }
+
+      } ~
       path( "status" ) {
         get {
           complete( OK -> GetStatusResponse( now.toString, "UP!" ) )
