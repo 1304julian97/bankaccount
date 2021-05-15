@@ -1,7 +1,8 @@
 package com.practice.bankaccount.domain.service
 
 import cats.data.EitherT
-import com.practice.bankaccount.domain.model.{ BankAccount, CacheAccount }
+import com.practice.bankaccount.domain.model.CacheAccount.cache
+import com.practice.bankaccount.domain.model.{BankAccount, CacheAccount}
 import com.practice.bankaccount.domain.repository.AccountRepository
 import com.practice.bankaccount.infrastructure.Logger.Logger
 import monix.eval.Task
@@ -10,8 +11,17 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object AccountService extends Logger {
+
+  def addBankAccountCache( account: BankAccount ): Unit = {
+    cache.put( account.number, account )
+  }
+
+  def getBanckAccountCache( accountNumber: Int ): Option[BankAccount] = {
+    cache.getIfPresent( accountNumber )
+  }
+
   def getPersonalAccount( accountNumber: Int )( repository: AccountRepository ): Task[Either[String, BankAccount]] = {
-    CacheAccount.getBanckAccountCache( accountNumber ) match {
+    getBanckAccountCache( accountNumber ) match {
       case Some( value ) =>
         log( "BankAccount got from Caché" )
         Task( Right( value ) )
@@ -19,7 +29,7 @@ object AccountService extends Logger {
         log( "Trying to find BankAccount in DB" )
         val accountT = for {
           account <- EitherT( repository.getAccount( accountNumber ) )
-          _ = CacheAccount.addBankAccountCache( account )
+          _ = addBankAccountCache( account )
         } yield account
         accountT.value
     }
@@ -48,7 +58,7 @@ object AccountService extends Logger {
         }
       }
       _ = savedAccount match {
-        case Right( value )  => CacheAccount.addBankAccountCache( value )
+        case Right( value )  => addBankAccountCache( value )
         case Left( message ) => Left( message )
       }
     } yield savedAccount
