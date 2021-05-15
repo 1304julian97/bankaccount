@@ -26,14 +26,6 @@ object CacheAccount {
       .maximumSize( 500 ) // maximum number of entries
       .build[Int, BankAccount]()
 
-  def addBankAccountCache( account: BankAccount ): Unit = {
-    cache.put( account.number, account )
-  }
-
-  def getBanckAccountCache( accountNumber: Int ): Option[BankAccount] = {
-    cache.getIfPresent( accountNumber )
-  }
-
 }
 object BankAccount {
 
