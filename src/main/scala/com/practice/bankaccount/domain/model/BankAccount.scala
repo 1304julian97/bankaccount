@@ -2,6 +2,10 @@ package com.practice.bankaccount.domain.model
 
 import java.time.LocalDateTime
 
+import com.github.blemale.scaffeine.{ Cache, Scaffeine }
+
+import scala.concurrent.duration.DurationInt
+
 sealed trait BankAccount {
   val number: Int
   val openDate: LocalDateTime
@@ -12,6 +16,17 @@ sealed trait BankAccount {
 case class SavingsAccount( number: Int, openDate: LocalDateTime, status: Status, balance: Int, rate: Double ) extends BankAccount
 case class CheckingAccount( number: Int, openDate: LocalDateTime, status: Status, balance: Int ) extends BankAccount
 
+object CacheAccount {
+
+  val cache: Cache[Int, BankAccount] =
+    Scaffeine()
+      .recordStats()
+      .expireAfterWrite( 10.minutes )
+      .expireAfterAccess( 10.minutes )
+      .maximumSize( 500 ) // maximum number of entries
+      .build[Int, BankAccount]()
+
+}
 object BankAccount {
 
   private def validateNumber( number: Int ): Either[String, Int] = {

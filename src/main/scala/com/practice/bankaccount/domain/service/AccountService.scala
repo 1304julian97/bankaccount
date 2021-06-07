@@ -1,16 +1,39 @@
 package com.practice.bankaccount.domain.service
 
 import cats.data.EitherT
-import cats.implicits._
-import com.practice.bankaccount.domain.model.BankAccount
+import com.practice.bankaccount.domain.model.CacheAccount.cache
+import com.practice.bankaccount.domain.model.{BankAccount, CacheAccount}
 import com.practice.bankaccount.domain.repository.AccountRepository
+import com.practice.bankaccount.infrastructure.Logger.Logger
 import monix.eval.Task
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.Success
 
-object AccountService {
+object AccountService extends Logger {
+
+  def addBankAccountCache( account: BankAccount ): Unit = {
+    cache.put( account.number, account )
+  }
+
+  def getBanckAccountCache( accountNumber: Int ): Option[BankAccount] = {
+    cache.getIfPresent( accountNumber )
+  }
+
+  def getPersonalAccount( accountNumber: Int )( repository: AccountRepository ): Task[Either[String, BankAccount]] = {
+    getBanckAccountCache( accountNumber ) match {
+      case Some( value ) =>
+        log( "BankAccount got from Caché" )
+        Task( Right( value ) )
+      case _ =>
+        log( "Trying to find BankAccount in DB" )
+        val accountT = for {
+          account <- EitherT( repository.getAccount( accountNumber ) )
+          _ = addBankAccountCache( account )
+        } yield account
+        accountT.value
+    }
+  }
 
   private def checkAccountType( accountType: String ): Future[Either[String, String]] = Future {
     if ( accountType == "S" || accountType == "C" ) Right( accountType )
@@ -33,6 +56,10 @@ object AccountService {
           case Right( account )     => repository.upsert( account )
           case Left( errorMessage ) => Future( Left( errorMessage ) )
         }
+      }
+      _ = savedAccount match {
+        case Right( value )  => addBankAccountCache( value )
+        case Left( message ) => Left( message )
       }
     } yield savedAccount
 

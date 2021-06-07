@@ -52,4 +52,11 @@ class AccountRepositoryH2 extends AccountRepository with AccountDAOMapperH2 {
     futureAccounts.map( list => Right( list ) )
   }
 
+  override def getAccount( accountNumber: Int ): Task[Either[String, BankAccount]] = {
+    val dbAction = H2Tables.bankAccounts.result
+    Task.deferFuture( db.run( dbAction ).map( _.toList ).map( _.find( _.accountNo == accountNumber ) match {
+      case Some( value ) => fromDAORecordToBankAccount( value )
+      case _             => Left( s"The account with the number: $accountNumber does not exist." )
+    } ) )
+  }
 }

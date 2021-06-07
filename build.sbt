@@ -14,7 +14,8 @@ libraryDependencies ++= Seq(
   "de.heikoseeberger"   %% "akka-http-circe"  % "1.20.1",
   "org.scalatest"       %% "scalatest"        % "3.1.2",
   "org.typelevel"       %% "cats-core"        % "2.1.1",
-  "io.monix"            %% "monix"            % "3.3.0"
+  "io.monix"            %% "monix"            % "3.3.0",
+  "com.github.blemale"  %% "scaffeine"        % "4.0.2",
 )
 
 mainClass in (Compile, run) := Some("com.practice.bankaccount.application.main.MainAppH2")
